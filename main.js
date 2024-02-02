@@ -1,51 +1,202 @@
+axios.defaults.headers.common['X-Auth-Token']='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+
+
+
 // GET REQUEST
 function getTodos() {
-  console.log('GET Request');
+  
+
+
+  // axios({
+
+  //   method:'get',
+  //   url:'https://jsonplaceholder.typicode.com/todos'
+  // params:{
+  //   _limit:5
+  // }
+  // })
+  // .then(res=>showOutput(res))
+  // .catch(err=>console.log(err));
+
+  axios.get("https://jsonplaceholder.typicode.com/todos?limit:5")
+  .then(res=>showOutput(res))
+  .catch(err=>console.log(err))
 }
+
+
 
 // POST REQUEST
 function addTodo() {
-  console.log('POST Request');
+  // axios({
+
+  //   method:'post',
+  //   url:'https://jsonplaceholder.typicode.com/todos',
+  //   data:{
+  //    title: 'new todo',
+  //     completed:false
+  //   }
+  // })
+  // .then((res)=>showOutput(res))
+  // .catch((err)=>console.error(err));
+
+  axios.post("https://jsonplaceholder.typicode.com/todos",{
+    title:"New todo",
+    completed:false
+  })
+  .then((res)=>showOutput(res))
+  .catch(err=>console.error(err))
+
 }
+
+
+
 
 // PUT/PATCH REQUEST
 function updateTodo() {
-  console.log('PUT/PATCH Request');
+  axios({
+    method:'patch',
+    url:'https://jsonplaceholder.typicode.com/todos/1',
+    data:{
+      title:'updated todo',
+      completed:true
+    }
+
+  })
+  .then((res)=>showOutput(res))
+  .catch((err)=>console.error(err))
 }
+
+
 
 // DELETE REQUEST
 function removeTodo() {
-  console.log('DELETE Request');
+  axios({
+    method:'delete',
+    url:'https://jsonplaceholder.typicode.com/todos/1'
+
+  })
+  .then((res)=>showOutput(res))
+  .catch(err=>console.log(err))
 }
+
+
 
 // SIMULTANEOUS DATA
 function getData() {
-  console.log('Simultaneous Request');
+axios.all([
+  axios.get('https://jsonplaceholder.typicode.com/todos'),
+  axios.get('https://jsonplaceholder.typicode.com/todos')
+])
+.then(axios.spread((todos,posts)=>showOutput(posts)))
+  showOutput(res[2])
+
 }
 
 // CUSTOM HEADERS
 function customHeaders() {
-  console.log('Custom Headers');
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'sometoken'
+    }
+  };
+
+  axios
+    .post(
+      'https://jsonplaceholder.typicode.com/todos',
+      { title: 'New todo', completed: false },
+      config  // Place the config object as the third parameter
+    )
+    .then(res => showOutput(res))
+    .catch(err => console.error(err));
 }
+
 
 // TRANSFORMING REQUESTS & RESPONSES
 function transformResponse() {
-  console.log('Transform Response');
+  const options={
+    method:'post',
+    url:'https://jsonplaceholder.typicode.com/todos',
+    data:{
+      title:'hello world'
+    },
+    transformResponse:axios.defaults.transformResponse.concat(data=>{
+      data.title=data.title.toUpperCase();
+      return data;
+    })
+  };
+
+  axios(options).then(res=>showOutput(res));
 }
 
 // ERROR HANDLING
 function errorHandling() {
-  console.log('Error Handling');
-}
+  axios.get(
+    'https://jsonplaceholder.typicode.com/todoss'
+  )
+  .then(res=>showOutput(res))
+  .catch(err=>{
+      if(err.response){
+        console.log(err.response.data);
+        console.log(err.response.status);
+        console.log(err.response.headers);
+      
+        if(err.response.status==404){
+          alert("error:page not found");
+        }
+      }
+
+        else if(err.request){
+          console.log(err.request);
+        }
+        else{
+          console.error(err.message);
+        }
+
+      
+    });
+  }
 
 // CANCEL TOKEN
 function cancelToken() {
-  console.log('Cancel Token');
+ const source=axios.CancelToken.source();
+ axios.get('https://jsonplaceholder.typicode.com/todos',{
+  cancelToken:source.token
+ })
+ .then(res=>showOutput(res))
+ .catch(thrown=>{
+  if(axios.isCancel(thrown)){
+
+    console.log(thrown.message)
+  }
+ });
+
+ if(true){
+  source.cancel('request canceled!')
+ }
 }
 
 // INTERCEPTING REQUESTS & RESPONSES
+axios.interceptors.request.use(
+  config=>{
+  console.log(
+    `${config.method.toUpperCase()} request sent to ${config.url} at ${new Date().getTime()}`
+    );
+  return config
+},
+error=>{
+  return Promise.reject(error);
+}
+);
+
 
 // AXIOS INSTANCES
+const axiosInstance=axios.create({
+  baseURL:'https://jsonplaceholder.typicode.com/todos'
+});
+
+axiosInstance.get('/comments').then(res=>showOutput(res));
 
 // Show output in browser
 function showOutput(res) {
